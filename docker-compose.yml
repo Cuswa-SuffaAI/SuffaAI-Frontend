@@ -7,3 +7,9 @@ services:
       - REACT_APP_API_BASE_URL=http://localhost:5001
     ports:
       - "3000:3000"
+    networks:
+      - suffaai_network
+
+networks:
+  suffaai_network:
+    external: true
