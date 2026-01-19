@@ -1,0 +1,9 @@
+services:
+  frontend:
+    image: suffaai/frontend:latest
+    container_name: suffaai-frontend
+    restart: always
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:5001
+    ports:
+      - "3000:3000"

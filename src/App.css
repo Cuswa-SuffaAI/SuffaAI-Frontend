@@ -1,0 +1,75 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent overall page scroll */
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 15px 20px; /* Slightly reduced padding */
+  color: white;
+  /* min-height is not needed if we fix the header height or let content define it */
+  text-align: center; /* Center title */
+  z-index: 10; /* Ensure header is above other content if overlapping (e.g. shadows) */
+  display: flex; /* For aligning title and selector */
+  justify-content: space-between; /* Puts title on left, selector on right */
+  align-items: center; /* Vertically align items */
+}
+
+.App-header h1 {
+    margin: 0;
+    font-size: 1.5em; /* Adjust font size as needed */
+    margin-right: auto; /* Pushes selector to the right if space-between isn't enough */
+}
+
+.provider-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Spacing between selector groups */
+    margin-left: 20px; /* Spacing from the title or edge */
+}
+
+.selector-group {
+    display: flex;
+    align-items: center;
+}
+
+.provider-selector-container label {
+    margin-right: 8px;
+    font-size: 0.9em;
+    color: #f0f2f5; /* Light color to match header text */
+}
+
+.provider-select,
+.agent-select {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    color: #495057;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.provider-select:focus,
+.agent-select:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.agent-select option:disabled {
+    color: #6c757d;
+    font-style: italic;
+    background-color: #f8f9fa;
+}
+
+.main-content {
+  display: flex;
+  flex-grow: 1; /* Allows this section to fill available vertical space */
+  overflow: hidden; /* Important for nested scrollable areas */
+  /* height: calc(100vh - YOUR_HEADER_HEIGHT); Adjust if header height is fixed */
+}
+
+/* Styles for the main chat area can be added here later */ 
