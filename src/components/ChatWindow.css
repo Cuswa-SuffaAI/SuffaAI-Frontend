@@ -279,6 +279,30 @@
     opacity: 0.7;
 }
 
+.source-similarity {
+    font-size: 0.85em;
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.message.user .source-similarity {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.source-names {
+    font-size: 0.9em;
+    opacity: 0.85;
+    color: #6c757d;
+}
+
+.message.user .source-names {
+    color: rgba(255, 255, 255, 0.85);
+}
+
 .source-preview {
     font-size: 0.9em;
     line-height: 1.4;

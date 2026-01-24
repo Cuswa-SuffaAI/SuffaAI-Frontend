@@ -18,6 +18,7 @@ function App() {
   const [availableAgents, setAvailableAgents] = useState([]);
   const [currentAgent, setCurrentAgent] = useState('D1');
   const [pendingToolSuggestion, setPendingToolSuggestion] = useState(null);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(false);
 
   const handleToolAccept = () => {
     // Send accept action to backend
@@ -139,6 +140,27 @@ function App() {
     setCurrentAgent(event.target.value);
   };
 
+  const handleLoadDocuments = async () => {
+    setIsLoadingDocs(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/hadiths/load`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`Dokümanlar yüklendi! Hadisler: ${data.hadiths?.hadiths_created || 0}, Embeddings: ${data.chunk_embeddings?.chunks_created || 0}`);
+      } else {
+        alert(`Hata: ${data.errors?.join(', ') || 'Bilinmeyen hata'}`);
+      }
+    } catch (err) {
+      alert(`Yükleme hatası: ${err.message}`);
+    } finally {
+      setIsLoadingDocs(false);
+    }
+  };
+
   const handleSendMessage = async (inputText, file) => {
     if (!inputText.trim() && !file) return;
 
@@ -256,6 +278,13 @@ function App() {
       <header className="App-header">
         <h1>AI Chatbot</h1>
         <div className="provider-selector-container">
+          <button
+            className="load-docs-btn"
+            onClick={handleLoadDocuments}
+            disabled={isLoadingDocs}
+          >
+            {isLoadingDocs ? '📄 Yükleniyor...' : '📄 Doküman Yükle'}
+          </button>
           <div className="selector-group">
             <label htmlFor="ai-provider-select">AI Provider: </label>
             <select 

@@ -47,11 +47,16 @@ function ChatWindow({ messages, onSendMessage, isLoading, error, activeSessionNa
                         {msg.sources.map((source, idx) => (
                           <div key={idx} className="source-item">
                             <div className="source-header">
-                              <strong>[{source.index}]</strong> 
-                              <span className="source-name">{source.source}</span>
-                              {source.page !== 'N/A' && <span className="source-page">Page {source.page}</span>}
+                              <strong>Hadis #{source.hadith_number}</strong>
+                              <span className="source-similarity">
+                                {(source.similarity * 100).toFixed(0)}% eşleşme
+                              </span>
                             </div>
-                            <div className="source-preview">{source.content_preview}</div>
+                            {source.sources && source.sources.length > 0 && (
+                              <div className="source-names">
+                                Kaynak: {source.sources.join(', ')}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
