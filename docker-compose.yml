@@ -4,16 +4,18 @@ services:
     container_name: suffaai-frontend
     restart: always
     environment:
-      - REACT_APP_API_BASE_URL=http://localhost:5001
+      - REACT_APP_API_BASE_URL=http://100.101.93.63:5001
       - WATCHPACK_POLLING=true
     ports:
       - "3000:3000"
     volumes:
       - ./src:/app/src
       - ./public:/app/public
-    networks:
-      - suffaai_network
+      - ./assets:/app/src/assets
+    network_mode: "host"
+#     networks:
+#       - suffaai_network
 
-networks:
-  suffaai_network:
-    external: true
+# networks:
+#   suffaai_network:
+#     external: true

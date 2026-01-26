@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import './ChatWindow.css';
 import MessageInput from './MessageInput';
 
-function ChatWindow({ messages, onSendMessage, isLoading, error, activeSessionName, toolSuggestion, onToolAccept, onToolReject }) {
+function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion, onToolAccept, onToolReject }) {
   const messagesEndRef = useRef(null);
   const [expandedSources, setExpandedSources] = useState({});
 
@@ -22,9 +22,6 @@ function ChatWindow({ messages, onSendMessage, isLoading, error, activeSessionNa
 
   return (
     <div className="chat-window">
-        <div className="chat-window-header">
-            <h3>{activeSessionName || "Chat"}</h3>
-        </div>
       <div className="message-list">
         {messages.map(msg => (
           <div key={msg.id} className={`message ${msg.sender} ${msg.sender === 'system' ? 'system-message' : ''}`}>
@@ -75,17 +72,12 @@ function ChatWindow({ messages, onSendMessage, isLoading, error, activeSessionNa
         )}
         {isLoading && (
           <div className="message system-message">
-            <div className="message-bubble">Typing...</div>
+            <div className="message-bubble">Sabırla...</div>
           </div>
-        )}
-        {!activeSessionName && messages.length === 0 && !isLoading && (
-            <div className="no-chat-selected">
-                <p>Select a chat from the sidebar or start a new one!</p>
-            </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <MessageInput onSendMessage={onSendMessage} disabled={isLoading || !activeSessionName} />
+      <MessageInput onSendMessage={onSendMessage} disabled={isLoading} />
       {error && <div className="error-banner">{error}</div>}
     </div>
   );

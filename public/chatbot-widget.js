@@ -7,7 +7,7 @@
   
   // Dynamic configuration - can be overridden by setting window.CBW_CONFIG
   const defaultConfig = {
-    apiHost: 'http://localhost:5001',
+    apiHost: 'http://100.101.93.63:5001',
     defaultModel: 'gpt-4o-mini',
     models: [],
     defaultAgent: 'D1',

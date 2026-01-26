@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from 'react';
-  import './App.css'; // We can add component-specific styles here later
-  import Sidebar from './components/Sidebar';
-  import ChatWindow from './components/ChatWindow';
+import React, { useState } from 'react';
+import './App.css';
+import ChatWindow from './components/ChatWindow';
+import logo from './assets/web-app-512x512.png';
+import splashVideo from './assets/Splash-Screen-Video-800w-16x9.mp4';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+// Sabit provider ve agent değerleri
+const FIXED_PROVIDER = 'openai';
+const FIXED_AGENT = 'D1';
+
 function App() {
   const [currentMessages, setCurrentMessages] = useState([]);
-  const [chatSessions, setChatSessions] = useState([{ id: 's1', name: 'Conversation' }]);
-  const [activeChatSessionId, setActiveChatSessionId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const [availableProviders, setAvailableProviders] = useState([]);
-  const [currentProvider, setCurrentProvider] = useState('');
-  
-  const [availableAgents, setAvailableAgents] = useState([]);
-  const [currentAgent, setCurrentAgent] = useState('D1');
   const [pendingToolSuggestion, setPendingToolSuggestion] = useState(null);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   const handleToolAccept = () => {
     // Send accept action to backend
@@ -90,54 +89,10 @@ function App() {
     ]);
   };
 
-  useEffect(() => {
-    setCurrentMessages([]); 
-    if (!activeChatSessionId && chatSessions.length > 0) {
-    }
-  }, [activeChatSessionId, chatSessions]); 
-
-  useEffect(() => {
-    console.log(`${API_BASE_URL}/api/models`);
-    fetch(`${API_BASE_URL}/api/models`)
-      .then(res => res.json())
-      .then(models => {
-        setAvailableProviders(models);
-        if (models.length > 0) {
-          setCurrentProvider(models[0].name); // or models[0].id depending on your backend structure
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    console.log(`${API_BASE_URL}/api/agents`);
-    fetch(`${API_BASE_URL}/api/agents`)
-      .then(res => res.json())
-      .then(agents => {
-        setAvailableAgents(agents);
-        // Set D1 as default agent if available
-        const d1Agent = agents.find(agent => agent.id === 'D1');
-        if (d1Agent) {
-          setCurrentAgent(d1Agent.id);
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    console.log("Current provider:", currentProvider);
-  }, [currentProvider]);
-
-  useEffect(() => {
-    console.log("Current agent:", currentAgent);
-  }, [currentAgent]);
-
-  const handleProviderChange = (event) => {
-    setCurrentProvider(event.target.value);
-  };
-
-  const handleAgentChange = (event) => {
-    setCurrentAgent(event.target.value);
+  const handleClearChat = () => {
+    setCurrentMessages([]);
+    setError(null);
+    setPendingToolSuggestion(null);
   };
 
   const handleLoadDocuments = async () => {
@@ -180,18 +135,18 @@ function App() {
 
     try {
       let aiResponseMessage;
-      const requestBody = { 
-        message: inputText, 
-        ai_provider: currentProvider,
-        agent_id: currentAgent
+      const requestBody = {
+        message: inputText,
+        ai_provider: FIXED_PROVIDER,
+        agent_id: FIXED_AGENT
       };
 
       if (file) {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('message', inputText);
-        formData.append('ai_provider', currentProvider);
-        formData.append('agent_id', currentAgent);
+        formData.append('ai_provider', FIXED_PROVIDER);
+        formData.append('agent_id', FIXED_AGENT);
 
         const response = await fetch(`${API_BASE_URL}/api/upload`, {
           method: 'POST',
@@ -259,81 +214,82 @@ function App() {
     }
   };
 
-  const handleSelectChatSession = (sessionId) => {
-    setActiveChatSessionId(sessionId);
-    setCurrentMessages([]);
-    setError(null); 
-  };
-
-  const handleNewChat = () => {
-    const newSessionId = `session_${Date.now()}`;
-    setActiveChatSessionId(newSessionId); 
-    setCurrentMessages([]);
-    setError(null);
-    setIsLoading(false);
-  };
+  if (showSplash) {
+    return (
+      <div className="splash-screen">
+        <video
+          autoPlay
+          muted
+          playsInline
+          onEnded={() => setShowSplash(false)}
+          className="splash-video"
+        >
+          <source src={splashVideo} type="video/mp4" />
+        </video>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1>AI Chatbot</h1>
-        <div className="provider-selector-container">
+        <div className="header-brand">
+          <img src={logo} alt="Suffa AI Logo" className="header-logo" />
+          <h1>Suffa AI</h1>
+        </div>
+        <button
+          className="hamburger-btn"
+          onClick={() => setIsSidebarOpen(true)}
+          aria-label="Menüyü aç"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </header>
+
+      {/* Sidebar Overlay */}
+      <div
+        className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h2>Menü</h2>
           <button
-            className="load-docs-btn"
+            className="sidebar-close-btn"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label="Menüyü kapat"
+          >
+            ×
+          </button>
+        </div>
+        <div className="sidebar-content">
+          <button
+            className="sidebar-btn"
             onClick={handleLoadDocuments}
             disabled={isLoadingDocs}
           >
-            {isLoadingDocs ? '📄 Yükleniyor...' : '📄 Doküman Yükle'}
+            {isLoadingDocs ? 'Yükleniyor...' : 'Doküman Yükle'}
           </button>
-          <div className="selector-group">
-            <label htmlFor="ai-provider-select">AI Provider: </label>
-            <select 
-              id="ai-provider-select" 
-              value={currentProvider} 
-              onChange={handleProviderChange}
-              className="provider-select"
-            >
-              {availableProviders.map(provider => (
-                <option key={provider.id} value={provider.name}>
-                  {provider.display_name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="selector-group">
-            <label htmlFor="ai-agent-select">Agent: </label>
-            <select 
-              id="ai-agent-select" 
-              value={currentAgent} 
-              onChange={handleAgentChange}
-              className="agent-select"
-            >
-              {availableAgents.map(agent => (
-                <option 
-                  key={agent.id} 
-                  value={agent.id}
-                  disabled={!agent.enabled}
-                >
-                  {agent.name} {!agent.enabled ? '(Disabled)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+          <button
+            className="sidebar-btn"
+            onClick={handleClearChat}
+            disabled={currentMessages.length === 0}
+          >
+            Sohbeti Temizle
+          </button>
         </div>
-      </header>
+      </div>
+
       <div className="main-content">
-        <Sidebar 
-          chatSessions={chatSessions} 
-          activeSessionId={activeChatSessionId} 
-          onSelectSession={handleSelectChatSession} 
-          onNewChat={handleNewChat} 
-        />
-        <ChatWindow 
-          messages={currentMessages} 
-          onSendMessage={handleSendMessage} 
-          isLoading={isLoading} 
+        <ChatWindow
+          messages={currentMessages}
+          onSendMessage={handleSendMessage}
+          isLoading={isLoading}
           error={error}
-          activeSessionName={chatSessions.find(s => s.id === activeChatSessionId)?.name || "New Chat"}
           toolSuggestion={pendingToolSuggestion}
           onToolAccept={handleToolAccept}
           onToolReject={handleToolReject}
