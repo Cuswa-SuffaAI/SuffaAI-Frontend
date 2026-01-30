@@ -171,22 +171,45 @@ function App() {
           throw new Error(errData.error || `HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        aiResponseMessage = data.response;
+
         // tool_suggestion varsa sistem mesajı olarak ekle
         if (data.tool_suggestion) {
           setPendingToolSuggestion(data.tool_suggestion);
         }
-        
-        // Add sources to AI message
+
+        // Parse response - handle both JSON hadith format and plain text
+        let answerText = data.response || '';
+        let hadiths = [];
+
+        // Try to parse JSON response from LLM
+        if (typeof answerText === 'string') {
+          try {
+            // Remove markdown code block if present
+            let jsonStr = answerText;
+            const jsonMatch = answerText.match(/```json\s*([\s\S]*?)\s*```/);
+            if (jsonMatch) {
+              jsonStr = jsonMatch[1];
+            }
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.answer) {
+              answerText = parsed.answer;
+              hadiths = parsed.hadiths || [];
+            }
+          } catch {
+            // Not JSON, use as plain text
+          }
+        }
+
+        // Add AI message with hadiths
         const aiMessage = {
           id: Date.now() + 1,
-          text: aiResponseMessage,
+          text: answerText,
           sender: 'ai',
           timestamp: new Date().toISOString(),
-          sources: data.sources || []
+          hadiths: hadiths
         };
         setCurrentMessages(prevMessages => [...prevMessages, aiMessage]);
-        
+
         // Return early to avoid duplicate message
         setIsLoading(false);
         return;

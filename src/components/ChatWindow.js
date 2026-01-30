@@ -1,24 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './ChatWindow.css';
 import MessageInput from './MessageInput';
+import HadithCard from './HadithCard';
 
 function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion, onToolAccept, onToolReject }) {
   const messagesEndRef = useRef(null);
-  const [expandedSources, setExpandedSources] = useState({});
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [messages]);
-
-  const toggleSources = (messageId) => {
-    setExpandedSources(prev => ({
-      ...prev,
-      [messageId]: !prev[messageId]
-    }));
-  };
 
   return (
     <div className="chat-window">
@@ -28,36 +21,13 @@ function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion,
             <div className="message-bubble">
                 <ReactMarkdown>{msg.text}</ReactMarkdown>
                 {msg.file && <div className="file-attachment">Attached: {msg.file.name}</div>}
-                
-                {/* Show sources if available */}
-                {msg.sources && msg.sources.length > 0 && (
-                  <div className="sources-section">
-                    <button 
-                      className="sources-toggle" 
-                      onClick={() => toggleSources(msg.id)}
-                    >
-                      {expandedSources[msg.id] ? '📚 Hide Sources' : `📚 View ${msg.sources.length} Sources`}
-                    </button>
-                    
-                    {expandedSources[msg.id] && (
-                      <div className="sources-list">
-                        {msg.sources.map((source, idx) => (
-                          <div key={idx} className="source-item">
-                            <div className="source-header">
-                              <strong>Hadis #{source.hadith_number}</strong>
-                              <span className="source-similarity">
-                                {(source.similarity * 100).toFixed(0)}% eşleşme
-                              </span>
-                            </div>
-                            {source.sources && source.sources.length > 0 && (
-                              <div className="source-names">
-                                Kaynak: {source.sources.join(', ')}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+
+                {/* Show hadith cards if available */}
+                {msg.hadiths && msg.hadiths.length > 0 && (
+                  <div className="hadiths-section">
+                    {msg.hadiths.map((hadith, idx) => (
+                      <HadithCard key={idx} hadith={hadith} />
+                    ))}
                   </div>
                 )}
             </div>
