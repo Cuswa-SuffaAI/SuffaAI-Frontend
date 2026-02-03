@@ -3,8 +3,9 @@ import ReactMarkdown from 'react-markdown';
 import './ChatWindow.css';
 import MessageInput from './MessageInput';
 import HadithCard from './HadithCard';
+import SiyerCard from './SiyerCard';
 
-function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion, onToolAccept, onToolReject }) {
+function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion, onToolAccept, onToolReject, selectedSource, onSourceChange }) {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -30,6 +31,15 @@ function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion,
                     ))}
                   </div>
                 )}
+
+                {/* Show siyer cards if available */}
+                {msg.siyerSections && msg.siyerSections.length > 0 && (
+                  <div className="siyer-sections">
+                    {msg.siyerSections.map((section, idx) => (
+                      <SiyerCard key={idx} section={section} />
+                    ))}
+                  </div>
+                )}
             </div>
           </div>
         ))}
@@ -46,6 +56,22 @@ function ChatWindow({ messages, onSendMessage, isLoading, error, toolSuggestion,
           </div>
         )}
         <div ref={messagesEndRef} />
+      </div>
+      <div className="source-toggle">
+        <button
+          className={`source-toggle-btn ${selectedSource === 'hadith' ? 'active' : ''}`}
+          onClick={() => onSourceChange('hadith')}
+          disabled={isLoading}
+        >
+          Hadis
+        </button>
+        <button
+          className={`source-toggle-btn ${selectedSource === 'siyer' ? 'active' : ''}`}
+          onClick={() => onSourceChange('siyer')}
+          disabled={isLoading}
+        >
+          Siyer
+        </button>
       </div>
       <MessageInput onSendMessage={onSendMessage} disabled={isLoading} />
       {error && <div className="error-banner">{error}</div>}

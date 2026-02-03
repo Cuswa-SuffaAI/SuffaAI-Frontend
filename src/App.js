@@ -18,6 +18,7 @@ function App() {
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [selectedSource, setSelectedSource] = useState('hadith');
 
   const handleToolAccept = () => {
     // Send accept action to backend
@@ -98,14 +99,19 @@ function App() {
   const handleLoadDocuments = async () => {
     setIsLoadingDocs(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/hadiths/load`, {
+      const response = await fetch(`${API_BASE_URL}/api/data/load`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
       });
       const data = await response.json();
-      if (response.ok) {
-        alert(`Dokümanlar yüklendi! Hadisler: ${data.hadiths?.hadiths_created || 0}, Embeddings: ${data.chunk_embeddings?.chunks_created || 0}`);
+      if (response.ok || response.status === 207) {
+        const hadithCount = data.hadith?.sections?.hadiths_created || data.hadith?.hadiths?.hadiths_created || 0;
+        const hadithChunks = data.hadith?.chunk_embeddings?.chunks_created || 0;
+        const siyerCount = data.siyer?.sections?.sections_created || 0;
+        const siyerChunks = data.siyer?.chunk_embeddings?.chunks_created || 0;
+        const errors = data.errors?.length ? `\nUyarılar: ${data.errors.join(', ')}` : '';
+        alert(`Dokümanlar yüklendi!\nHadis: ${hadithCount} kayıt, ${hadithChunks} embedding\nSiyer: ${siyerCount} bölüm, ${siyerChunks} embedding${errors}`);
       } else {
         alert(`Hata: ${data.errors?.join(', ') || 'Bilinmeyen hata'}`);
       }
@@ -138,7 +144,8 @@ function App() {
       const requestBody = {
         message: inputText,
         ai_provider: FIXED_PROVIDER,
-        agent_id: FIXED_AGENT
+        agent_id: FIXED_AGENT,
+        source: selectedSource
       };
 
       if (file) {
@@ -177,14 +184,14 @@ function App() {
           setPendingToolSuggestion(data.tool_suggestion);
         }
 
-        // Parse response - handle both JSON hadith format and plain text
+        // Parse response - handle JSON (hadith/siyer) and plain text
         let answerText = data.response || '';
         let hadiths = [];
+        let siyerSections = [];
 
         // Try to parse JSON response from LLM
         if (typeof answerText === 'string') {
           try {
-            // Remove markdown code block if present
             let jsonStr = answerText;
             const jsonMatch = answerText.match(/```json\s*([\s\S]*?)\s*```/);
             if (jsonMatch) {
@@ -194,19 +201,21 @@ function App() {
             if (parsed.answer) {
               answerText = parsed.answer;
               hadiths = parsed.hadiths || [];
+              siyerSections = parsed.sections || [];
             }
           } catch {
             // Not JSON, use as plain text
           }
         }
 
-        // Add AI message with hadiths
+        // Add AI message with source-specific data
         const aiMessage = {
           id: Date.now() + 1,
           text: answerText,
           sender: 'ai',
           timestamp: new Date().toISOString(),
-          hadiths: hadiths
+          hadiths: hadiths,
+          siyerSections: siyerSections
         };
         setCurrentMessages(prevMessages => [...prevMessages, aiMessage]);
 
@@ -316,6 +325,8 @@ function App() {
           toolSuggestion={pendingToolSuggestion}
           onToolAccept={handleToolAccept}
           onToolReject={handleToolReject}
+          selectedSource={selectedSource}
+          onSourceChange={setSelectedSource}
         />
       </div>
     </div>
