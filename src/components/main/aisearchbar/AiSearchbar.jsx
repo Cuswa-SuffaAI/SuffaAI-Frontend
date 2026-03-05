@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const AiSearchbar = ({onSendMessage}) => {
+const AiSearchbar = ({onSendMessage,disabled}) => {
 
     const [input, setInput] = useState("")
 
@@ -25,7 +25,7 @@ const AiSearchbar = ({onSendMessage}) => {
 
 
     return (
-        <div className="flex-none bg-black flex justify-center p-4">
+        <div className={`flex-none bg-black flex justify-center p-4 ${disabled ? 'disabled' : ''}`}>
             <div className="w-[90%] flex items-center gap-3">
 
                 <input
@@ -35,12 +35,14 @@ const AiSearchbar = ({onSendMessage}) => {
                     onKeyPress={handleKeyPress}
                     placeholder="Suffa AI'a sorun"
                     className="flex-1 rounded-full py-3 px-5 bg-[#222222] text-white outline-none"
+                    disabled={disabled}
                 />
 
 
                 <button 
                     className="active:scale-95 transition-transform cursor-pointer"
                     onClick={handleSend}
+                    disabled={disabled}
                 >
                     <svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="24.5" cy="24.5" r="24.5" fill="#F9F9F9" />

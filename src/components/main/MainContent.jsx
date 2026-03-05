@@ -8,7 +8,7 @@ import bgImage from "../../assets/background.svg";
 
 
 
-const MainContent = ({messages,onSendMessage}) => {
+const MainContent = ({messages,onSendMessage,isLoading, error}) => {
 
   const [history,setHistory]=useState(1);
   const [inOutControl,SetInOutControl]=useState(false);
@@ -40,7 +40,7 @@ const MainContent = ({messages,onSendMessage}) => {
         <History/>
       }
 
-      <AiSearchbar onSendMessage={onSendMessage}/>
+      <AiSearchbar onSendMessage={onSendMessage} disabled={isLoading} />
     </div>
   );
 };

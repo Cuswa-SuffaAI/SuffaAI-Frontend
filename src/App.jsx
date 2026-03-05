@@ -156,6 +156,8 @@ export default function App() {
       };
 
       setCurrentMessages(prevMessages => [...prevMessages, aiMessage]);
+      setIsLoading(false);
+      return;
 
     } catch (err) {
       setError(err.message);
@@ -168,6 +170,8 @@ export default function App() {
       };
 
       setCurrentMessages(prevMessages => [...prevMessages, errorMessage]);
+
+
     } finally {
       setIsLoading(false);
     }
@@ -185,6 +189,8 @@ export default function App() {
       <MainContent
         messages={currentMessages}
         onSendMessage={handleSendMessage}
+        isLoading={isLoading} 
+        error={error}
 
       />
     </div>
