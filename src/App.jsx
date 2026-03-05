@@ -101,6 +101,7 @@ export default function App() {
     setError(null);
 
     try {
+      let aiResponseMessage;
       const requestBody = { 
         message: inputText, 
         ai_provider: currentProvider,
@@ -115,6 +116,8 @@ export default function App() {
         body: JSON.stringify(requestBody),
       });
 
+
+
       if (!response.ok) {
         const errData = await response.json().catch(() => ({
           message: 'Failed to send message'
@@ -124,6 +127,21 @@ export default function App() {
 
       const data = await response.json();
 
+    //   const response={
+    //     "answer": "İslam'da sabır, önemli bir erdem olarak kabul edilir ve bu konuda birçok hadis bulunmaktadır. [1] İşte sabır ile ilgili bir hadis:",
+    //     "hadiths": [
+    //         {
+    //             "hadith_number": 49,
+    //             "narrator": "Ebû Hureyre (Allah Ondan razı olsun)",
+    //             "sources": ["Tirmizî, Zühd 57"],
+    //             "turkish_text": "Ebû Hureyre (Allah Ondan razı olsun)’den rivayet edildiğine göre Rasûlullah (sallallahu aleyhi vesellem) şöyle buyurdu: “Erkek olsun kadın olsun her mü’min kimsenin kendisine, çocuğuna ve malına devamlı olarak bela ve musibet iner. [2] Kişi bütün bunlara sabredip tahammül gösterirse günahsız olarak Allah’a kavuşur.”",
+    //             "arabic_text": "عن أبي هريرة رضي الله عنه، قال رسول الله ﷺ: ما يزال البلاء بالمؤمن والمؤمنة في نفسه وولده وماله حتى يلقى الله تعالى وما عليه خطيئة."
+    //         }
+    //     ]
+    // }
+    // const data=response
+      aiResponseMessage = data
+
       // Tool suggestion varsa kaydet
       if (data.tool_suggestion) {
         setPendingToolSuggestion(data.tool_suggestion);
@@ -131,7 +149,7 @@ export default function App() {
 
       const aiMessage = {
         id: Date.now() + 1,
-        text: data.answer,
+        text: aiResponseMessage,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         sources: data.sources || []

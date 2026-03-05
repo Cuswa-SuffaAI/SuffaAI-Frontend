@@ -6,7 +6,9 @@ import cardIcon from "../../../assets/card.svg";
 import bgImage from "../../../assets/background.svg";
 import backIcon from "../../../assets/back.svg";
 
-const MessageActions = ({ text }) => {
+const MessageActions = ({ sourcesAll}) => {
+
+
 
     const [show, setShow] = useState(false);
     const [open, setOpen] = useState(false);
@@ -15,7 +17,7 @@ const MessageActions = ({ text }) => {
     const [sourceOverlay, setSourceOverlay] = useState(false);
   
     const handleCopy = async () => {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(sourcesAll[0].turkish_text);
       setShow(true);
   
       setTimeout(() => {
@@ -85,23 +87,23 @@ const MessageActions = ({ text }) => {
       </div>
 
       <Resources open={open} onClose={() => setOpen(false)}>
-        <div className="py-1 text-white flex justify-between">
-          <span>1 - İbn Âbidîn, Reddü’l-muhtâr, 2/346 (Usul ve Furu Hükmü). </span>
-          <img
-              src={cardIcon}
-              alt="send"
-              onClick={() => setSourceOverlay(true)}  
-            />
-        </div>
+        {sourcesAll.map((all, index) => (
+          <div
+            key={index}
+            className="py-1 text-white flex justify-between items-start"
+          >
+            <span>
+              {index + 1} - {all.sources}
+            </span>
 
-        <div className="py-1 text-white flex justify-between">
-          <span>2 - Kâsânî, Bedâî’, 2/47 (Zekatın Sarf Yerleri).</span>
-          <img
+            <img
               src={cardIcon}
               alt="send"
-              onClick={() => setSourceOverlay(true)}  
+              className="cursor-pointer ml-2"
+              onClick={() => setSourceOverlay(true)}
             />
-        </div>
+          </div>
+        ))}
       </Resources>
       {sourceOverlay && (
       <div

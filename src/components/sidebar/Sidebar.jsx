@@ -31,10 +31,21 @@ const Sidebar = () => {
 }, [opensettings]);
 
   return (
-    <aside className={`flex flex-col h-screen bg-[#333333] text-white p-6
-      overflow-y-auto scrollbar-none scrollbar-thin
-      transition-all duration-300 ease-in-out
-      ${isOpen ? 'w-screen md:w-76 lg:[500px]' : 'hidden'}`}>
+    // <aside className={`flex flex-col h-screen bg-[#333333] text-white p-6
+    //   overflow-y-auto scrollbar-none scrollbar-thin
+    //   transition-all duration-300 ease-in-out
+    //   ${isOpen ? 'w-screen md:w-76 lg:[500px]' : 'hidden'}`}>
+    <aside
+      className={`
+        fixed top-0 left-0 z-50
+        flex flex-col h-screen
+        bg-[#333333] text-white p-6
+        overflow-y-auto scrollbar-none scrollbar-thin
+        transform transition-transform duration-500 ease-in-out
+        w-screen md:w-76
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+    >
       <div className='flex flex-col gap-y-8'>
         <div className='flex justify-between px-6'>
           <svg onClick={toggleSidebar} width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">

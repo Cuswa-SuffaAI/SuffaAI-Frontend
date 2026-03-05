@@ -6,4 +6,5 @@ html, body, #root {
   padding: 0;
   height: 100%;
   /* font-family: 'Manrope', sans-serif; */
+  background-color: black;
 }

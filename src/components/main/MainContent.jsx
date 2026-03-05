@@ -8,8 +8,6 @@ import bgImage from "../../assets/background.svg";
 
 
 
-
-
 const MainContent = ({messages,onSendMessage}) => {
 
   const [history,setHistory]=useState(1);
@@ -18,7 +16,7 @@ const MainContent = ({messages,onSendMessage}) => {
 
   return (
     <div
-      className={`flex-1 ${isOpen ? "hidden md:flex" : ""} flex-col h-screen text-white bg-black`}
+      className={`flex-1 ${isOpen ? "hidden md:flex md:ml-76" : "flex flex-col"} flex-col h-screen text-white bg-black`}
       style={{
         backgroundImage: `url(${bgImage})`,
         backgroundSize: "contain",
@@ -27,6 +25,7 @@ const MainContent = ({messages,onSendMessage}) => {
         backgroundColor: "black"
       }}
     >
+
        <Header 
         //title="Musibetlere Sabretmenin Önemi" 
          title=""
