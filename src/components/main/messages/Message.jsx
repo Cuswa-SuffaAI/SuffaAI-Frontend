@@ -1,11 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 import MessageActions from './MessageActions';
 import { useEffect, useRef } from "react";
 
 
-const Message = ({messages}) => {
+const Message = ({messages, isLoading = false}) => {
 
   const messagesEndRef = useRef(null);
+  const [openArabicMap, setOpenArabicMap] = useState({});
+
+  const toggleArabicText = (key) => {
+    setOpenArabicMap((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   useEffect(() => {
   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -13,9 +21,18 @@ const Message = ({messages}) => {
   return (
 
 
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 w-8/9 mx-auto"
+    <div className="flex-1 overflow-y-auto main-content-scroll p-4 space-y-4 w-8/9 mx-auto"
       >
       {messages.map((msg, index) => {
+        const isAiStreaming = msg.sender === 'ai' && Boolean(msg.isStreaming);
+        const aiAnswer = msg.sender === 'ai'
+          ? (typeof msg.text === 'string' ? msg.text : (msg.text?.answer || msg.text?.response || ''))
+          : '';
+        const showStreamingPlaceholder = isAiStreaming && !aiAnswer?.trim();
+
+        const aiHadiths = Array.isArray(msg.text?.hadiths) ? msg.text.hadiths : [];
+        const aiSections = Array.isArray(msg.text?.sections) ? msg.text.sections : [];
+        const aiSources = Array.isArray(msg.text?.sources) ? msg.text.sources : [];
 
         return (
           <React.Fragment key={index}>
@@ -32,7 +49,9 @@ const Message = ({messages}) => {
               {
                 msg.sender === "user"
                   ? msg.text
-                  : msg.text.answer
+                  : showStreamingPlaceholder
+                    ? <span className="stream-placeholder-chip">Sabırla...</span>
+                  : aiAnswer
                       .split(/(\[\d+\])/g)
                       .map((part, i) =>
                         /\[\d+\]/.test(part) ? (
@@ -49,7 +68,9 @@ const Message = ({messages}) => {
               }
             </span>
             {/* Hadisler */}
-            {msg.text.hadiths?.map((hadith, hIndex) => {
+            {aiHadiths.map((hadith, hIndex) => {
+              const arabicKey = `${msg.id}-${hIndex}`;
+              const hasArabicText = Boolean(hadith?.arabic_text?.trim());
               const formattedHadith = hadith.turkish_text
                 .split(/(\[\d+\])/g)
                 .map((part, i) =>
@@ -68,19 +89,77 @@ const Message = ({messages}) => {
               return (
                 <blockquote
                   key={hIndex}
-                  className="border-l-4 border-[#00FF94] pl-4 text-white italic text-[15px] leading-7 my-4"
+                  className="fade-in-item border-l-4 border-[#00FF94] pl-4 text-white italic text-[15px] leading-7 my-4"
+                  style={{ animationDelay: `${hIndex * 70}ms` }}
                 >
                   {formattedHadith}
+
+                  {hasArabicText ? (
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleArabicText(arabicKey)}
+                        className="text-[#00FF94] text-sm font-medium hover:opacity-85 transition"
+                      >
+                        {openArabicMap[arabicKey] ? 'Arapca Metni Gizle' : 'Arapca Metni Goster'}
+                      </button>
+
+                      <div
+                        className={`grid overflow-hidden transition-all duration-300 ease-out ${openArabicMap[arabicKey] ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'}`}
+                      >
+                        <blockquote className="border-l-4 border-[#00FF94] pl-4 text-white italic text-[15px] leading-7 overflow-hidden">
+                          {hadith.arabic_text}
+                        </blockquote>
+                      </div>
+                    </div>
+                  ) : null}
+                </blockquote>
+              );
+            })}
+
+            {/* Siyer bolumleri */}
+            {aiSections.map((section, sIndex) => {
+              const sectionText = section?.relevant_text || section?.text || '';
+              if (!sectionText) return null;
+
+              return (
+                <blockquote
+                  key={`section-${sIndex}`}
+                  className="fade-in-item border-l-4 border-[#00FF94] pl-4 text-white italic text-[15px] leading-7 my-4"
+                  style={{ animationDelay: `${sIndex * 70}ms` }}
+                >
+                  {section?.section_id ? (
+                    <div className="text-[#00FF94] not-italic text-sm mb-1">
+                      {section.section_id}
+                      {section?.main_theme ? ` - ${section.main_theme}` : ''}
+                    </div>
+                  ) : null}
+                  {sectionText}
                 </blockquote>
               );
             })}
             </div>
 
-            {msg.sender === "ai" && <MessageActions sourcesAll={msg.text.hadiths} />}
+            {msg.sender === "ai" && !isAiStreaming && (
+              <MessageActions
+                sourcesAll={aiSources}
+                hadiths={aiHadiths}
+                sections={aiSections}
+                answerText={aiAnswer}
+              />
+            )}
           </React.Fragment>
 
         );
       })}
+
+      {isLoading && !messages.some((msg) => msg.sender === 'ai' && msg.isStreaming) ? (
+        <div className="w-fit break-words whitespace-pre-wrap px-4 py-3 rounded-xl mr-auto border border-white/12 bg-[#121212]/92 text-white/65 text-left italic animate-pulse shadow-[0_6px_16px_rgba(0,0,0,0.28)]">
+          <span className="font-manrope font-normal text-[15px] leading-[100%] tracking-[0%]">
+            <span className="stream-placeholder-chip">Sabırla...</span>
+          </span>
+        </div>
+      ) : null}
 
       <div ref={messagesEndRef} />
     </div>

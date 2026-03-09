@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Resources from "../../overlay/ResourcesOverlay";
 import Copy from "../../overlay/CopyOverlay";
 import ErrorReport from "../../overlay/ErrorReportOverlay";
@@ -6,7 +6,7 @@ import cardIcon from "../../../assets/card.svg";
 import bgImage from "../../../assets/background.svg";
 import backIcon from "../../../assets/back.svg";
 
-const MessageActions = ({ sourcesAll}) => {
+const MessageActions = ({ sourcesAll = [], hadiths = [], sections = [], answerText = '' }) => {
 
 
 
@@ -15,9 +15,54 @@ const MessageActions = ({ sourcesAll}) => {
     const [openReport,setOpenReport]=useState(false);
 
     const [sourceOverlay, setSourceOverlay] = useState(false);
+    const [selectedSourceIndex, setSelectedSourceIndex] = useState(null);
   
+    const formatSourceLine = (sourceItem) => {
+      if (Array.isArray(sourceItem?.sources) && sourceItem.sources.length > 0) {
+        const prefix = sourceItem?.hadith_number ? `Hadis ${sourceItem.hadith_number}: ` : '';
+        return `${prefix}${sourceItem.sources.join(' | ')}`;
+      }
+
+      if (sourceItem?.section_id) {
+        const pages = Array.isArray(sourceItem?.pages) ? sourceItem.pages.join(', ') : '';
+        const pagesPart = pages ? ` | Sayfalar: ${pages}` : '';
+        return `${sourceItem.section_id}${sourceItem.main_theme ? ` - ${sourceItem.main_theme}` : ''}${pagesPart}`;
+      }
+
+      return 'Kaynak bilgisi';
+    };
+
+    const sourceDetails = useMemo(() => {
+      return sourcesAll.map((sourceItem, index) => {
+        const matchedHadith = hadiths.find((item) => item?.hadith_number === sourceItem?.hadith_number);
+        const matchedSection = sections.find((item) => item?.section_id === sourceItem?.section_id);
+
+        const content =
+          matchedHadith?.turkish_text ||
+          matchedSection?.relevant_text ||
+          matchedSection?.text ||
+          answerText ||
+          'Detayli metin bulunamadi.';
+
+        const sourceLabel = formatSourceLine(sourceItem);
+
+        return {
+          id: index,
+          sourceLabel,
+          content,
+          footer: matchedSection?.main_theme ||
+            (Array.isArray(matchedHadith?.sources) ? matchedHadith.sources.join(' | ') : ''),
+        };
+      });
+    }, [sourcesAll, hadiths, sections, answerText]);
+
+    const selectedSource = selectedSourceIndex !== null ? sourceDetails[selectedSourceIndex] : null;
+
     const handleCopy = async () => {
-      await navigator.clipboard.writeText(sourcesAll[0].turkish_text);
+      const copyText = hadiths[0]?.turkish_text || sections[0]?.relevant_text || sections[0]?.text || answerText;
+      if (!copyText) return;
+
+      await navigator.clipboard.writeText(copyText);
       setShow(true);
   
       setTimeout(() => {
@@ -33,7 +78,7 @@ const MessageActions = ({ sourcesAll}) => {
         <Copy show={show}/>
         <button
           onClick={handleCopy} 
-          className="flex items-center gap-1 hover:text-white transition cursor-pointer">
+          className="icon-button flex items-center gap-1 hover:text-white transition cursor-pointer">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M14.4199 7.04956H17.7803C19.3782 7.04956 20.5267 7.05075 21.4004 7.1687C22.2593 7.2847 22.7778 7.50525 23.1611 7.89038C23.5454 8.27602 23.7661 8.7984 23.8818 9.66187C23.9994 10.5395 24 11.6927 24 13.2966V18.9197C24 20.5237 23.9994 21.6768 23.8818 22.5544C23.7661 23.4179 23.5454 23.9403 23.1611 24.3259C22.7778 24.711 22.2592 24.9316 21.4004 25.0476C20.5267 25.1656 19.3782 25.1667 17.7803 25.1667H14.4199C12.8215 25.1667 11.6735 25.1656 10.7998 25.0476C9.94098 24.9317 9.42213 24.7112 9.03809 24.3259C8.6539 23.9404 8.43379 23.418 8.31836 22.5544C8.20108 21.6768 8.2002 20.5238 8.2002 18.9197V13.2966C8.2002 11.6924 8.20089 10.5386 8.31836 9.66089C8.43395 8.79754 8.65434 8.27594 9.03809 7.89038C9.42214 7.50509 9.94093 7.28466 10.7998 7.1687C11.455 7.08024 12.2646 7.05735 13.3027 7.05151L14.4199 7.04956Z" stroke="#F9F9F9"/>
             <path d="M12.833 2.83325C15.0466 2.83325 16.6571 2.83394 17.8867 2.99927C19.1019 3.16271 19.8707 3.47891 20.4453 4.05396C20.9464 4.55504 21.2483 5.20311 21.4268 6.16528C20.4759 6.04918 19.2819 6.05005 17.7803 6.05005H14.4199C12.8499 6.05005 11.6222 6.04891 10.666 6.17798C9.69519 6.30904 8.92968 6.5821 8.3291 7.18481C7.72942 7.78734 7.45746 8.55498 7.32715 9.52856C7.19875 10.488 7.2002 11.7202 7.2002 13.2961V18.9182C7.2002 20.4313 7.19989 21.6344 7.31738 22.5901C6.43509 22.4252 5.81805 22.1565 5.33691 21.7229L5.2207 21.6125C4.64556 21.0379 4.32948 20.2692 4.16602 19.054C4.00063 17.8243 4 16.214 4 14.0002V11.6663C4 9.45254 4.00063 7.8422 4.16602 6.61255C4.32948 5.39728 4.64556 4.6286 5.2207 4.05396C5.79535 3.47881 6.56403 3.16273 7.7793 2.99927C9.00895 2.83388 10.6193 2.83325 12.833 2.83325Z" stroke="#F9F9F9" stroke-opacity="0.5"/>
@@ -42,7 +87,7 @@ const MessageActions = ({ sourcesAll}) => {
         </button>
 
         {/* Like */}
-        <button className="transition">
+        <button className="icon-button transition">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="path-1-inside-1_988_7008" fill="white">
             <path d="M23.6483 18.9758L24.4708 14.2158C24.519 13.9368 24.5058 13.6506 24.4319 13.3773C24.358 13.104 24.2253 12.8501 24.0431 12.6334C23.8608 12.4167 23.6335 12.2424 23.3768 12.1228C23.1202 12.0032 22.8406 11.941 22.5574 11.9408H16.5118C16.3708 11.9406 16.2316 11.9098 16.1037 11.8505C15.9758 11.7912 15.8624 11.7047 15.7713 11.5972C15.6801 11.4896 15.6135 11.3635 15.576 11.2276C15.5384 11.0918 15.5309 10.9493 15.5539 10.8103L16.3274 6.0911C16.4524 5.32484 16.4166 4.54097 16.2224 3.78926C16.1385 3.47881 15.9777 3.19452 15.7548 2.96266C15.5319 2.73081 15.2542 2.55888 14.9473 2.46276L14.7781 2.40793C14.3959 2.28586 13.9816 2.31423 13.6196 2.48726C13.2229 2.6786 12.9336 3.02743 12.8263 3.4416L12.2709 5.58126C12.0944 6.26226 11.8375 6.91983 11.5056 7.5401C11.0203 8.4466 10.2713 9.17343 9.4931 9.84426L7.8131 11.2909C7.5802 11.4922 7.3983 11.7458 7.2823 12.0309C7.16631 12.316 7.11952 12.6246 7.14577 12.9313L8.09427 23.8898C8.13601 24.3742 8.3578 24.8254 8.7159 25.1544C9.07399 25.4833 9.54236 25.6661 10.0286 25.6666H15.4524C19.5136 25.6666 22.9798 22.8363 23.6471 18.9758"/>
@@ -54,7 +99,7 @@ const MessageActions = ({ sourcesAll}) => {
         </button>
         <ErrorReport open={openReport} onClose={()=>setOpenReport(false)} />
         {/* Dislike */}
-        <button onClick={()=>setOpenReport(true)} className="hover:text-red-400 transition cursor-pointer">
+        <button onClick={()=>setOpenReport(true)} className="icon-button hover:text-red-400 transition cursor-pointer">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="path-1-inside-1_988_7011" fill="white">
             <path d="M23.6483 9.89909L24.4708 14.6591C24.519 14.9381 24.5058 15.2242 24.4319 15.4976C24.358 15.7709 24.2253 16.0248 24.0431 16.2415C23.8608 16.4582 23.6335 16.6324 23.3768 16.752C23.1202 16.8717 22.8406 16.9338 22.5574 16.9341H16.5118C16.3708 16.9342 16.2316 16.965 16.1037 17.0244C15.9758 17.0837 15.8624 17.1701 15.7713 17.2777C15.6801 17.3852 15.6135 17.5113 15.576 17.6472C15.5384 17.7831 15.5309 17.9255 15.5539 18.0646L16.3274 22.7838C16.4525 23.5504 16.4168 24.3347 16.2224 25.0868C16.0591 25.7086 15.5796 26.2091 14.9473 26.4121L14.7781 26.4669C14.3959 26.589 13.9816 26.5606 13.6196 26.3876C13.4258 26.296 13.2543 26.1631 13.1173 25.9982C12.9802 25.8334 12.8809 25.6406 12.8263 25.4333L12.2709 23.2936C12.0944 22.6126 11.8375 21.955 11.5056 21.3348C11.0203 20.4283 10.2713 19.7014 9.4931 19.0306L7.8131 17.5839C7.5802 17.3827 7.3983 17.1291 7.2823 16.844C7.16631 16.5588 7.11952 16.2503 7.14577 15.9436L8.09427 4.98509C8.13601 4.50064 8.3578 4.04943 8.7159 3.7205C9.07399 3.39156 9.54236 3.20879 10.0286 3.20825H15.4524C19.5136 3.20825 22.9798 6.03858 23.6471 9.89909"/>
@@ -66,7 +111,7 @@ const MessageActions = ({ sourcesAll}) => {
         </button>
 
         {/* Voice */}
-        <button className="transition">
+        <button className="icon-button transition">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4.0625 10.0625C3.51022 10.0625 3.0625 10.5102 3.0625 11.0625V16.9375C3.0625 17.4898 3.51022 17.9375 4.0625 17.9375H7.10417C7.32054 17.9375 7.53107 18.0077 7.70417 18.1375L12.8375 21.9875C13.4967 22.4819 14.4375 22.0115 14.4375 21.1875V6.8125C14.4375 5.98846 13.4967 5.51807 12.8375 6.0125L7.70417 9.8625C7.53107 9.99232 7.32054 10.0625 7.10417 10.0625H4.0625Z" stroke="#F9F9F9" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M18.8125 10.9375C18.8125 10.9375 20.5625 11.8125 20.5625 14C20.5625 16.1875 18.8125 17.0625 18.8125 17.0625M20.5625 5.6875C24.0625 7.4375 25.8125 10.0625 25.8125 14C25.8125 17.9375 24.0625 20.5625 20.5625 22.3125" stroke="#F9F9F9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -76,7 +121,7 @@ const MessageActions = ({ sourcesAll}) => {
 
       </div>
       <div onClick={() => setOpen(true)} className="flex gap-x-1 md:gap-x-2 items-center cursor-pointer">
-        <button className="transition" >
+        <button className="icon-button transition" >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6.18518 24.9258C5.58426 24.9258 5.07001 24.712 4.64244 24.2845C4.21488 23.8569 4.00073 23.3423 4 22.7406V5.25916C4 4.65823 4.21415 4.14399 4.64244 3.71642C5.07074 3.28885 5.58499 3.0747 6.18518 3.07397H19.2963C19.8972 3.07397 20.4118 3.28812 20.8401 3.71642C21.2684 4.14472 21.4822 4.65896 21.4815 5.25916V22.7406C21.4815 23.3416 21.2677 23.8562 20.8401 24.2845C20.4126 24.7128 19.8979 24.9266 19.2963 24.9258H6.18518ZM11.6481 12.9073L14.3796 11.2684L17.1111 12.9073V5.25916H11.6481V12.9073Z" fill="#F9F9F9"/>
             </svg>
@@ -93,19 +138,22 @@ const MessageActions = ({ sourcesAll}) => {
             className="py-1 text-white flex justify-between items-start"
           >
             <span>
-              {index + 1} - {all.sources}
+              {index + 1} - {formatSourceLine(all)}
             </span>
 
             <img
               src={cardIcon}
               alt="send"
-              className="cursor-pointer ml-2"
-              onClick={() => setSourceOverlay(true)}
+              className="icon-svg cursor-pointer ml-2"
+              onClick={() => {
+                setSelectedSourceIndex(index);
+                setSourceOverlay(true);
+              }}
             />
           </div>
         ))}
       </Resources>
-      {sourceOverlay && (
+      {sourceOverlay && selectedSource && (
       <div
         className="fixed inset-0 z-[99999] bg-black h-screen w-full flex items-center justify-center"
         style={{
@@ -118,11 +166,12 @@ const MessageActions = ({ sourcesAll}) => {
       >
         {/* SOL ÜST KAPATMA ICONU */}
         <button
-          className="absolute top-16 left-120 text-white text-2xl hover:opacity-70 transition "
+          className="icon-button absolute top-16 left-120 text-white text-2xl hover:opacity-70 transition "
         >
           <img
               src={backIcon}
               alt="send"
+              className="icon-svg"
               onClick={() => setSourceOverlay(false)}  
             />
         </button>
@@ -137,8 +186,7 @@ const MessageActions = ({ sourcesAll}) => {
             className="text-white font-light text-[24px] leading-[150%] text-left"
             style={{ fontFamily: "Manrope" }}
           >
-            Oruçlu iken unutarak yemek yemek orucu bozmaz. Bu konuda Hanefi
-            fıkhında görüş birliği vardır
+            {selectedSource.content}
           </p>
 
           {/* Kaynak */}
@@ -146,7 +194,8 @@ const MessageActions = ({ sourcesAll}) => {
             className="mt-6 font-light text-[16px] leading-[140%] text-left"
             style={{ fontFamily: "Manrope", color: "#00FF94" }}
           >
-            İbn Abidin, Reddü'l Muhtar, Cilt 2, Sayfa 398 - Unutarak yeme bahsi.
+            {selectedSource.sourceLabel}
+            {selectedSource.footer ? ` | ${selectedSource.footer}` : ''}
           </p>
 
           {/* Marka */}

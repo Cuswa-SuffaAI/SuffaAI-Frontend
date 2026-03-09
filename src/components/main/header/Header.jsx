@@ -12,10 +12,17 @@ const Header = ({ title, titleControl, inOutControl }) => {
       <div className="flex flex-row justify-between items-center w-full max-w-8/9">
         <div className="">
           {!isOpen ?
-            <svg onClick={toggleSidebar} width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7.5 32.5C3.63401 32.5 0.5 29.366 0.5 25.5L0.5 7.5C0.5 3.63401 3.63401 0.500002 7.5 0.500002H24.5C28.366 0.500002 31.5 3.63401 31.5 7.5V25.5C31.5 29.366 28.366 32.5 24.5 32.5H7.5Z" stroke="#F9F9F9" />
-              <path d="M11.5 14.5L9.5 12.5383L11.5 10.5M15 14.5383H21.5M9.5 18.5H21.5M9.5 22.5H21.5M15 10.5H21.5" stroke="#F9F9F9" stroke-linecap="round" stroke-linejoin="round" />
-            </svg> : null
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="icon-button cursor-pointer rounded-md p-1 transition hover:bg-white/10"
+              aria-label="Sidebar ac"
+            >
+              <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 32.5C3.63401 32.5 0.5 29.366 0.5 25.5L0.5 7.5C0.5 3.63401 3.63401 0.500002 7.5 0.500002H24.5C28.366 0.500002 31.5 3.63401 31.5 7.5V25.5C31.5 29.366 28.366 32.5 24.5 32.5H7.5Z" stroke="#F9F9F9" />
+                <path d="M11.5 14.5L9.5 12.5383L11.5 10.5M15 14.5383H21.5M9.5 18.5H21.5M9.5 22.5H21.5M15 10.5H21.5" stroke="#F9F9F9" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button> : null
 
           }
 

@@ -8,7 +8,15 @@ import bgImage from "../../assets/background.svg";
 
 
 
-const MainContent = ({messages,onSendMessage,isLoading, error}) => {
+const MainContent = ({
+  messages,
+  onSendMessage,
+  isLoading,
+  error,
+  chatSource,
+  onChatSourceChange,
+  sourceOptions,
+}) => {
 
   const [history,setHistory]=useState(1);
   const [inOutControl,SetInOutControl]=useState(false);
@@ -16,7 +24,7 @@ const MainContent = ({messages,onSendMessage,isLoading, error}) => {
 
   return (
     <div
-      className={`flex-1 ${isOpen ? "hidden md:flex md:ml-76" : "flex flex-col"} flex-col h-screen text-white bg-black`}
+      className={`flex-1 min-w-0 ${isOpen ? "hidden md:flex md:ml-76" : "flex"} flex-col h-screen text-white bg-black transition-all duration-300`}
       style={{
         backgroundImage: `url(${bgImage})`,
         backgroundSize: "contain",
@@ -35,12 +43,18 @@ const MainContent = ({messages,onSendMessage,isLoading, error}) => {
 
       {messages.length!=0 
         ? 
-        <Message messages={messages}/> 
+        <Message messages={messages} isLoading={isLoading}/> 
         : 
         <History/>
       }
 
-      <AiSearchbar onSendMessage={onSendMessage} disabled={isLoading} />
+      <AiSearchbar
+        onSendMessage={onSendMessage}
+        disabled={isLoading}
+        chatSource={chatSource}
+        onChatSourceChange={onChatSourceChange}
+        sourceOptions={sourceOptions}
+      />
     </div>
   );
 };

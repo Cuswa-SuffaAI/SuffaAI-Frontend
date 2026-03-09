@@ -1,8 +1,17 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
-const AiSearchbar = ({onSendMessage,disabled}) => {
+const AiSearchbar = ({
+    onSendMessage,
+    disabled,
+    chatSource = 'hadith',
+    onChatSourceChange,
+    sourceOptions = [],
+}) => {
 
     const [input, setInput] = useState("")
+    const [isSourceMenuOpen, setIsSourceMenuOpen] = useState(false)
+    const inputRef = useRef(null)
+    const sourceMenuRef = useRef(null)
 
     const handleInputChange=(e)=>{
         setInput(e.target.value)
@@ -15,7 +24,7 @@ const AiSearchbar = ({onSendMessage,disabled}) => {
             setInput("");
         }
     }
-    const handleKeyPress=(e)=>{
+    const handleKeyDown=(e)=>{
         if(e.key=="Enter" && !e.shiftKey)
         {
             e.preventDefault()
@@ -23,18 +32,96 @@ const AiSearchbar = ({onSendMessage,disabled}) => {
         }
     }
 
+    useEffect(() => {
+        if (!inputRef.current) return
+
+        const element = inputRef.current
+        const maxHeight = 176
+
+        element.style.height = "auto"
+        const nextHeight = Math.min(element.scrollHeight, maxHeight)
+        element.style.height = `${nextHeight}px`
+        element.style.overflowY = element.scrollHeight > maxHeight ? "auto" : "hidden"
+    }, [input])
+
+    useEffect(() => {
+        if (!isSourceMenuOpen) return
+
+        const handleOutsideMenuClick = (event) => {
+            if (!sourceMenuRef.current?.contains(event.target)) {
+                setIsSourceMenuOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleOutsideMenuClick)
+        return () => document.removeEventListener('mousedown', handleOutsideMenuClick)
+    }, [isSourceMenuOpen])
+
+    const handleFocusInput = (event) => {
+        const isControlClick = event.target.closest('button,select,option');
+        if (isControlClick) return;
+
+        if (!disabled) {
+            inputRef.current?.focus()
+        }
+    }
+
+    const selectedSource = sourceOptions.find((option) => option.value === chatSource)
+
 
     return (
         <div className={`flex-none bg-black flex justify-center p-4 ${disabled ? 'disabled' : ''}`}>
-            <div className="w-[90%] flex items-center gap-3">
+            <div
+                className="w-[90%] flex items-center gap-3 rounded-full p-1"
+                onClick={handleFocusInput}
+            >
 
-                <input
-                    type="text"
+                <div className="relative shrink-0" ref={sourceMenuRef}>
+                    <button
+                        type="button"
+                        onClick={() => setIsSourceMenuOpen((prev) => !prev)}
+                        className="min-w-[118px] rounded-2xl border border-green-500/25 bg-[#1e1e1e]/95 py-2.5 pl-4 pr-10 text-sm font-medium text-white/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] outline-none transition-all duration-200 hover:border-green-400/45 hover:bg-[#232323] focus:border-green-400/70 focus:shadow-[0_0_0_2px_rgba(74,222,128,0.2),0_8px_20px_rgba(0,0,0,0.28)] disabled:opacity-60"
+                        disabled={disabled}
+                        aria-expanded={isSourceMenuOpen}
+                        aria-haspopup="listbox"
+                    >
+                        {selectedSource?.label || 'Secim'}
+                    </button>
+                    <span className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-green-300/90 transition-transform duration-200 ${isSourceMenuOpen ? 'rotate-180' : ''}`}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </span>
+
+                    <div
+                        className={`absolute left-0 bottom-full mb-2 min-w-[158px] rounded-xl border border-green-500/25 bg-[#151515] p-1 shadow-[0_12px_28px_rgba(0,0,0,0.5)] z-20 transition-all duration-200 ease-out origin-bottom ${isSourceMenuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 translate-y-1 scale-95 pointer-events-none'}`}
+                    >
+                        {sourceOptions.map((option) => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => {
+                                    onChatSourceChange?.(option.value)
+                                    setIsSourceMenuOpen(false)
+                                }}
+                                className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${chatSource === option.value ? 'bg-green-500/18 text-green-300' : 'text-white/90 hover:bg-white/8'}`}
+                                role="option"
+                                aria-selected={chatSource === option.value}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <textarea
+                    ref={inputRef}
                     value={input}
                     onChange={handleInputChange}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
                     placeholder="Suffa AI'a sorun"
-                    className="flex-1 rounded-full py-3 px-5 bg-[#222222] text-white outline-none"
+                    rows={1}
+                    className="message-input-scroll flex-1 resize-none rounded-3xl py-3 px-5 bg-[#222222] text-white outline-none border border-transparent leading-6 focus:border-green-400/40 focus:shadow-[0_0_0_2px_rgba(74,222,128,0.24),0_0_12px_rgba(74,222,128,0.16)]"
                     disabled={disabled}
                 />
 
@@ -60,3 +147,4 @@ const AiSearchbar = ({onSendMessage,disabled}) => {
 }
 
 export default AiSearchbar
+

@@ -2,24 +2,21 @@ import React from 'react'
 
 const NewChat = () => {
   return (
-    <div className='flex gap-x-4 items-center justify-center'>
-      <svg width="28" height="28" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g clip-path="url(#clip0_378_8257)">
-        <path opacity="0.5" d="M22.1099 3.35791C22.1099 3.35791 22.225 5.3173 23.9542 7.04509C25.682 8.77429 27.6414 8.88938 27.6414 8.88938M12.8003 20.5974L10.4033 18.199" stroke="#F9F9F9" stroke-width="1.5"/>
-        <path d="M22.1098 3.35807L23.032 2.43593C23.7657 1.70241 24.7607 1.29039 25.7982 1.29053C26.8357 1.29066 27.8306 1.70293 28.5641 2.43664C29.2977 3.17034 29.7097 4.16539 29.7095 5.20288C29.7094 6.24036 29.2971 7.2353 28.5634 7.96882L27.6399 8.89097L19.1658 17.3665C18.5917 17.9405 18.3047 18.2276 17.9879 18.4748C17.6144 18.7659 17.2104 19.0155 16.7829 19.2193C16.4206 19.3912 16.0356 19.5191 15.2654 19.7763L12.8002 20.599L11.2046 21.1304C11.0186 21.1927 10.8189 21.2019 10.628 21.1569C10.437 21.1119 10.2625 21.0146 10.1238 20.8758C9.9852 20.737 9.88804 20.5623 9.84326 20.3714C9.79849 20.1804 9.80788 19.9807 9.87038 19.7948L10.4018 18.2006L11.2245 15.7353C11.4802 14.9652 11.6081 14.5802 11.7815 14.2178C11.987 13.7887 12.2352 13.3871 12.526 13.0129C12.7732 12.6961 13.0602 12.4091 13.6343 11.8336L22.1098 3.35807Z" stroke="#F9F9F9" stroke-width="1.5"/>
-        <path d="M29.7086 15.4993C29.7086 23.3468 23.3473 29.7081 15.4998 29.7081C1.29101 29.7081 1.29102 29.7077 1.29102 15.4993C1.29102 7.6518 7.65228 1.29053 15.4998 1.29053" stroke="#F9F9F9" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
-        </g>
-        <defs>
-        <clipPath id="clip0_378_8257">
-        <rect width="31" height="31" fill="white"/>
-        </clipPath>
-        </defs>
-     </svg>
-     <div className="font-thin not-italic text-base leading-none tracking-normal text-center">
-        Yeni Sohbet
-     </div>
-
-    </div>
+    <button
+      type="button"
+      className="group flex w-full items-center gap-3 rounded-xl border border-white/14 bg-[#232323] px-3 py-2.5 text-left transition hover:border-green-400/45 hover:bg-[#2a2a2a]"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/12 bg-[#2f2f2f] text-white transition group-hover:border-green-400/50 group-hover:text-green-300">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-white">Yeni Sohbet</p>
+        <p className="text-xs text-white/50">Bos bir konusma baslat</p>
+      </div>
+    </button>
   )
 }
 

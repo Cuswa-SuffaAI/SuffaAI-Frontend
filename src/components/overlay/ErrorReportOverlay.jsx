@@ -28,7 +28,7 @@ const ErrorReport = ({ open, onClose }) => {
         <img
             src={sendIcon}
             alt="send"
-            className="w-[30px] h-[30px] md:w-[53px] md:h-[53px] cursor-pointer"
+          className="icon-svg w-[30px] h-[30px] md:w-[53px] md:h-[53px] cursor-pointer"
             />
         </div>
 
