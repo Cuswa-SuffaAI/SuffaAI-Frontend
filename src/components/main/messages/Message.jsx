@@ -33,6 +33,7 @@ const Message = ({messages, isLoading = false}) => {
         const aiHadiths = Array.isArray(msg.text?.hadiths) ? msg.text.hadiths : [];
         const aiSections = Array.isArray(msg.text?.sections) ? msg.text.sections : [];
         const aiSources = Array.isArray(msg.text?.sources) ? msg.text.sources : [];
+        const aiFetvalar = Array.isArray(msg.text?.fetvalar) ? msg.text.fetvalar : [];
 
         return (
           <React.Fragment key={index}>
@@ -117,6 +118,27 @@ const Message = ({messages, isLoading = false}) => {
               );
             })}
 
+            {/* Fetvalar - sadece ilk sonuç */}
+            {(() => {
+              const fetva = aiFetvalar[0];
+              const fetvaText = fetva?.answer || fetva?.relevant_text || '';
+              if (!fetva || !fetvaText) return null;
+              return (
+                <blockquote
+                  className="fade-in-item border-l-4 border-[#00FF94] pl-4 text-white italic text-[15px] leading-7 my-4"
+                >
+                  <div className="not-italic text-[#00FF94] text-sm mb-1 flex flex-wrap gap-x-3 gap-y-1">
+                    {fetva?.subject && <span className="capitalize">{fetva.subject}</span>}
+                    {fetva?.page && <span>Sayfa {fetva.page}</span>}
+                  </div>
+                  {fetva?.question && (
+                    <div className="not-italic text-white/60 text-sm mb-2">S: {fetva.question}</div>
+                  )}
+                  {fetvaText}
+                </blockquote>
+              );
+            })()}
+
             {/* Siyer bolumleri */}
             {aiSections.map((section, sIndex) => {
               const sectionText = section?.relevant_text || section?.text || '';
@@ -128,10 +150,15 @@ const Message = ({messages, isLoading = false}) => {
                   className="fade-in-item border-l-4 border-[#00FF94] pl-4 text-white italic text-[15px] leading-7 my-4"
                   style={{ animationDelay: `${sIndex * 70}ms` }}
                 >
-                  {section?.section_id ? (
-                    <div className="text-[#00FF94] not-italic text-sm mb-1">
-                      {section.section_id}
-                      {section?.main_theme ? ` - ${section.main_theme}` : ''}
+                  {(section?.section_id || section?.main_theme) ? (
+                    <div className="text-[#00FF94] not-italic text-sm mb-1 flex flex-wrap gap-x-3 gap-y-1">
+                      {section?.main_theme && <span>{section.main_theme}</span>}
+                      {Array.isArray(section?.volume) && section.volume.length > 0 && (
+                        <span>{section.volume.join(', ')}</span>
+                      )}
+                      {Array.isArray(section?.pages) && section.pages.length > 0 && (
+                        <span>Sayfa {section.pages.join(', ')}</span>
+                      )}
                     </div>
                   ) : null}
                   {sectionText}
@@ -145,6 +172,7 @@ const Message = ({messages, isLoading = false}) => {
                 sourcesAll={aiSources}
                 hadiths={aiHadiths}
                 sections={aiSections}
+                fetvalar={aiFetvalar}
                 answerText={aiAnswer}
               />
             )}

@@ -50,7 +50,13 @@ const normalizeChatPayload = (payload) => {
       ? payload.sections
       : [];
 
-  return { answer, hadiths, sections, sources };
+  const fetvalar = Array.isArray(parsedFromResponse?.fetvalar)
+    ? parsedFromResponse.fetvalar
+    : Array.isArray(payload?.fetvalar)
+      ? payload.fetvalar
+      : [];
+
+  return { answer, hadiths, sections, sources, fetvalar };
 };
 
 const unescapeJsonLikeString = (value) =>
@@ -272,6 +278,7 @@ const getStructuredPayloadFromStreamRaw = (rawText) => {
       hadiths: Array.isArray(parsed.hadiths) ? parsed.hadiths : [],
       sections: Array.isArray(parsed.sections) ? parsed.sections : [],
       sources: Array.isArray(parsed.sources) ? parsed.sources : [],
+      fetvalar: Array.isArray(parsed.fetvalar) ? parsed.fetvalar : [],
     };
   }
 
@@ -279,11 +286,14 @@ const getStructuredPayloadFromStreamRaw = (rawText) => {
   const progressiveSections = extractProgressiveArrayField(rawText, 'sections');
   const progressiveSources = extractProgressiveArrayField(rawText, 'sources');
 
+  const progressiveFetvalar = extractProgressiveArrayField(rawText, 'fetvalar');
+
   return {
     answer: getDisplayTextFromStreamRaw(rawText),
     hadiths: progressiveHadiths,
     sections: progressiveSections,
     sources: progressiveSources,
+    fetvalar: progressiveFetvalar,
   };
 };
 
@@ -306,6 +316,7 @@ export default function App() {
   const sourceOptions = [
     { value: 'hadith', label: 'Hadis' },
     { value: 'siyer', label: 'Siyer' },
+    { value: 'fetva', label: 'Fetva' },
   ];
 
   const setStreamingMessagePayload = (messageId, nextPayload) => {
@@ -317,6 +328,7 @@ export default function App() {
         const prevHadiths = Array.isArray(msg.text?.hadiths) ? msg.text.hadiths : [];
         const prevSections = Array.isArray(msg.text?.sections) ? msg.text.sections : [];
         const prevSources = Array.isArray(msg.text?.sources) ? msg.text.sources : [];
+        const prevFetvalar = Array.isArray(msg.text?.fetvalar) ? msg.text.fetvalar : [];
 
         const nextHadiths = Array.isArray(nextPayload?.hadiths) && nextPayload.hadiths.length > 0
           ? nextPayload.hadiths
@@ -327,6 +339,9 @@ export default function App() {
         const nextSources = Array.isArray(nextPayload?.sources) && nextPayload.sources.length > 0
           ? nextPayload.sources
           : prevSources;
+        const nextFetvalar = Array.isArray(nextPayload?.fetvalar) && nextPayload.fetvalar.length > 0
+          ? nextPayload.fetvalar
+          : prevFetvalar;
 
         return {
           ...msg,
@@ -336,6 +351,7 @@ export default function App() {
             hadiths: nextHadiths,
             sections: nextSections,
             sources: nextSources,
+            fetvalar: nextFetvalar,
           },
           sources: nextSources,
           isStreaming: true,
@@ -390,7 +406,7 @@ export default function App() {
     const aiMessageId = Date.now() + 1;
     const streamingMessage = {
       id: aiMessageId,
-      text: { answer: '', hadiths: [], sections: [], sources: [] },
+      text: { answer: '', hadiths: [], sections: [], sources: [], fetvalar: [] },
       sender: 'ai',
       timestamp: new Date().toISOString(),
       sources: [],
@@ -457,7 +473,13 @@ export default function App() {
         }
 
         if (eventName === 'context') {
-          // Intentionally ignored: keep stream experience as raw JSON tokens.
+          // For fetva: populate fetvalar from RAG context (full original text) before streaming starts.
+          if (Array.isArray(payload.fetvalar) && payload.fetvalar.length > 0) {
+            setStreamingMessagePayload(aiMessageId, {
+              fetvalar: payload.fetvalar,
+              sources: Array.isArray(payload.sources) ? payload.sources : [],
+            });
+          }
           return;
         }
 
@@ -465,17 +487,20 @@ export default function App() {
           const normalizedData = normalizeChatPayload(payload.result || {});
 
           setCurrentMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.id === aiMessageId
-                ? {
-                    ...msg,
-                    text: normalizedData,
-                    sources: normalizedData.sources || [],
-                    isStreaming: false,
-                    hasStreamContent: true,
-                  }
-                : msg
-            )
+            prevMessages.map((msg) => {
+              if (msg.id !== aiMessageId) return msg;
+              // Prefer context fetvalar (full RAG text) over LLM-generated ones
+              const contextFetvalar = Array.isArray(msg.text?.fetvalar) && msg.text.fetvalar.length > 0
+                ? msg.text.fetvalar
+                : normalizedData.fetvalar || [];
+              return {
+                ...msg,
+                text: { ...normalizedData, fetvalar: contextFetvalar },
+                sources: normalizedData.sources || [],
+                isStreaming: false,
+                hasStreamContent: true,
+              };
+            })
           );
 
           streamCompleted = true;

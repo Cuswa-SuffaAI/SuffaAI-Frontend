@@ -6,7 +6,7 @@ import cardIcon from "../../../assets/card.svg";
 import bgImage from "../../../assets/background.svg";
 import backIcon from "../../../assets/back.svg";
 
-const MessageActions = ({ sourcesAll = [], hadiths = [], sections = [], answerText = '' }) => {
+const MessageActions = ({ sourcesAll = [], hadiths = [], sections = [], fetvalar = [], answerText = '' }) => {
 
 
 
@@ -18,15 +18,24 @@ const MessageActions = ({ sourcesAll = [], hadiths = [], sections = [], answerTe
     const [selectedSourceIndex, setSelectedSourceIndex] = useState(null);
   
     const formatSourceLine = (sourceItem) => {
+      if (sourceItem?.fetva_id) {
+        const parts = [];
+        if (sourceItem.subject) parts.push(sourceItem.subject);
+        if (sourceItem.page) parts.push(`Sayfa ${sourceItem.page}`);
+        return parts.length > 0 ? parts.join(' — ') : 'Fetva';
+      }
+
       if (Array.isArray(sourceItem?.sources) && sourceItem.sources.length > 0) {
         const prefix = sourceItem?.hadith_number ? `Hadis ${sourceItem.hadith_number}: ` : '';
         return `${prefix}${sourceItem.sources.join(' | ')}`;
       }
 
       if (sourceItem?.section_id) {
-        const pages = Array.isArray(sourceItem?.pages) ? sourceItem.pages.join(', ') : '';
-        const pagesPart = pages ? ` | Sayfalar: ${pages}` : '';
-        return `${sourceItem.section_id}${sourceItem.main_theme ? ` - ${sourceItem.main_theme}` : ''}${pagesPart}`;
+        const parts = [];
+        if (sourceItem.main_theme) parts.push(sourceItem.main_theme);
+        if (Array.isArray(sourceItem.volume) && sourceItem.volume.length > 0) parts.push(sourceItem.volume.join(', '));
+        if (Array.isArray(sourceItem.pages) && sourceItem.pages.length > 0) parts.push(`Sayfa ${sourceItem.pages.join(', ')}`);
+        return parts.length > 0 ? parts.join(' — ') : sourceItem.section_id;
       }
 
       return 'Kaynak bilgisi';
@@ -36,8 +45,11 @@ const MessageActions = ({ sourcesAll = [], hadiths = [], sections = [], answerTe
       return sourcesAll.map((sourceItem, index) => {
         const matchedHadith = hadiths.find((item) => item?.hadith_number === sourceItem?.hadith_number);
         const matchedSection = sections.find((item) => item?.section_id === sourceItem?.section_id);
+        const matchedFetva = fetvalar.find((item) => item?.fetva_id === sourceItem?.fetva_id);
 
         const content =
+          matchedFetva?.answer ||
+          matchedFetva?.relevant_text ||
           matchedHadith?.turkish_text ||
           matchedSection?.relevant_text ||
           matchedSection?.text ||
@@ -50,11 +62,13 @@ const MessageActions = ({ sourcesAll = [], hadiths = [], sections = [], answerTe
           id: index,
           sourceLabel,
           content,
-          footer: matchedSection?.main_theme ||
-            (Array.isArray(matchedHadith?.sources) ? matchedHadith.sources.join(' | ') : ''),
+          footer: matchedFetva?.subject
+            ? `${matchedFetva.subject}${matchedFetva.page ? ` — Sayfa ${matchedFetva.page}` : ''}`
+            : matchedSection?.main_theme ||
+              (Array.isArray(matchedHadith?.sources) ? matchedHadith.sources.join(' | ') : ''),
         };
       });
-    }, [sourcesAll, hadiths, sections, answerText]);
+    }, [sourcesAll, hadiths, sections, fetvalar, answerText]);
 
     const selectedSource = selectedSourceIndex !== null ? sourceDetails[selectedSourceIndex] : null;
 
