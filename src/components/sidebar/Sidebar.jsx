@@ -87,7 +87,7 @@ const Sidebar = () => {
     >
       <div className='flex flex-col gap-y-2.5 px-1'>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[34px] leading-[1] font-serif tracking-tight text-white">SuffaAI</h2>
+          <h2 className="text-[26px] md:text-[34px] leading-[1] font-serif tracking-tight text-white">SuffaAI</h2>
           <button
             type="button"
             onClick={toggleSidebar}

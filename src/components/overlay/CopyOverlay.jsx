@@ -5,9 +5,9 @@ const Copy = ({ show }) => {
     <div className="relative inline-block w-full">
 
       {show && (
-        <div className="absolute bottom-full mb-10 md:left-1/2 -translate-x-1/20 md:translate-x-10 z-[9999]">
+        <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 z-[9999]">
 
-          <div className="bg-[#171717] rounded-xl md:rounded-full p-3 shadow-2xl w-[350px] md:min-w-[500px]">
+          <div className="bg-[#171717] rounded-xl md:rounded-full p-3 shadow-2xl w-[92vw] max-w-[350px] md:min-w-[500px] md:max-w-none">
 
             <div className="flex flex-col-reverse md:flex-row md:items-center gap-1 md:gap-6 md:justify-center">
 

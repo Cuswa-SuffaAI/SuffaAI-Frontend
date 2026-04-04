@@ -7,6 +7,15 @@ export default {
       fontFamily: {
         poppins: ['Poppins', 'sans-serif'],
       },
+      spacing: {
+        '76': '19rem',
+      },
+      width: {
+        '8/9': '88.888%',
+      },
+      maxWidth: {
+        '8/9': '88.888%',
+      },
     },
   },
   plugins: [],

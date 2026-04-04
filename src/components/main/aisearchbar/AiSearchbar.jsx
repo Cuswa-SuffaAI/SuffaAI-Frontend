@@ -70,13 +70,15 @@ const AiSearchbar = ({
 
 
     return (
-        <div className={`flex-none bg-black flex justify-center p-4 ${disabled ? 'disabled' : ''}`}>
+        <div className={`flex-none bg-black flex justify-center px-4 pt-2 pb-5 ${disabled ? 'disabled' : ''}`}>
             <div
-                className="w-[90%] flex items-center gap-3 rounded-full p-1"
+                className="w-full max-w-[90%] flex flex-col md:flex-row md:items-center gap-2 md:gap-3"
                 onClick={handleFocusInput}
             >
 
-                <div className="relative shrink-0" ref={sourceMenuRef}>
+                {/* Seçim butonu — mobilde üst satır ortada, masaüstünde yan yana */}
+                <div className="flex justify-center md:justify-start md:w-auto" ref={sourceMenuRef}>
+                <div className="relative shrink-0">
                     <button
                         type="button"
                         onClick={() => setIsSourceMenuOpen((prev) => !prev)}
@@ -94,7 +96,7 @@ const AiSearchbar = ({
                     </span>
 
                     <div
-                        className={`absolute left-0 bottom-full mb-2 min-w-[158px] rounded-xl border border-green-500/25 bg-[#151515] p-1 shadow-[0_12px_28px_rgba(0,0,0,0.5)] z-20 transition-all duration-200 ease-out origin-bottom ${isSourceMenuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 translate-y-1 scale-95 pointer-events-none'}`}
+                        className={`absolute left-0 bottom-full mb-2 w-full md:min-w-[158px] md:w-auto rounded-xl border border-green-500/25 bg-[#151515] p-1 shadow-[0_12px_28px_rgba(0,0,0,0.5)] z-20 transition-all duration-200 ease-out origin-bottom ${isSourceMenuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 translate-y-1 scale-95 pointer-events-none'}`}
                     >
                         {sourceOptions.map((option) => (
                             <button
@@ -113,33 +115,35 @@ const AiSearchbar = ({
                         ))}
                     </div>
                 </div>
+                </div>
 
-                <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Suffa AI'a sorun"
-                    rows={1}
-                    className="message-input-scroll flex-1 resize-none rounded-3xl py-3 px-5 bg-[#222222] text-white outline-none border border-transparent leading-6 focus:border-green-400/40 focus:shadow-[0_0_0_2px_rgba(74,222,128,0.24),0_0_12px_rgba(74,222,128,0.16)]"
-                    disabled={disabled}
-                />
+                {/* Textarea + Send — mobilde alt satır, masaüstünde yan yana devam */}
+                <div className="flex flex-1 items-center gap-2 md:gap-3">
+                    <textarea
+                        ref={inputRef}
+                        value={input}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Suffa AI'a sorun"
+                        rows={1}
+                        className="message-input-scroll flex-1 resize-none rounded-3xl py-3 px-4 md:py-3 md:px-5 min-h-[48px] bg-[#222222] text-white outline-none border border-transparent leading-6 focus:border-green-400/40 focus:shadow-[0_0_0_2px_rgba(74,222,128,0.24),0_0_12px_rgba(74,222,128,0.16)]"
+                        disabled={disabled}
+                    />
 
-
-                <button 
-                    className="active:scale-95 transition-transform cursor-pointer"
-                    onClick={handleSend}
-                    disabled={disabled}
-                >
-                    <svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="24.5" cy="24.5" r="24.5" fill="#F9F9F9" />
-                        <path d="M24.7478 6.6136C24.8404 6.38822 25.1596 6.38822 25.2522 6.6136L25.6143 7.49438C25.7805 7.89858 26.1014 8.21951 26.5056 8.38568L27.3864 8.74776C27.6118 8.8404 27.6118 9.1596 27.3864 9.25224L26.5056 9.61432C26.1014 9.78049 25.7805 10.1014 25.6143 10.5056L25.2522 11.3864C25.1596 11.6118 24.8404 11.6118 24.7478 11.3864L24.3857 10.5056C24.2195 10.1014 23.8986 9.78049 23.4944 9.61432L22.6136 9.25224C22.3882 9.1596 22.3882 8.8404 22.6136 8.74776L23.4944 8.38568C23.8986 8.21951 24.2195 7.89858 24.3857 7.49438L24.7478 6.6136Z" fill="#333333" />
-                        <path d="M15.6637 14.8181C15.7872 14.5176 16.2128 14.5176 16.3363 14.8181L16.8191 15.9925C17.0406 16.5314 17.4686 16.9594 18.0075 17.1809L19.1819 17.6637C19.4824 17.7872 19.4824 18.2128 19.1819 18.3363L18.0075 18.8191C17.4686 19.0406 17.0406 19.4686 16.8191 20.0075L16.3363 21.1819C16.2128 21.4824 15.7872 21.4824 15.6637 21.1819L15.1809 20.0075C14.9594 19.4686 14.5314 19.0406 13.9925 18.8191L12.8181 18.3363C12.5176 18.2128 12.5176 17.7872 12.8181 17.6637L13.9925 17.1809C14.5314 16.9594 14.9594 16.5314 15.1809 15.9925L15.6637 14.8181Z" fill="#333333" />
-                        <path d="M33.4114 14.4317C33.6276 13.9059 34.3724 13.9059 34.5886 14.4317L35.4334 16.4869C35.8211 17.43 36.57 18.1789 37.5131 18.5666L39.5683 19.4114C40.0941 19.6276 40.0941 20.3724 39.5683 20.5886L37.5131 21.4334C36.57 21.8211 35.8211 22.57 35.4334 23.5131L34.5886 25.5683C34.3724 26.0941 33.6276 26.0941 33.4114 25.5683L32.5666 23.5131C32.1789 22.57 31.43 21.8211 30.4869 21.4334L28.4317 20.5886C27.9059 20.3724 27.9059 19.6276 28.4317 19.4114L30.4869 18.5666C31.43 18.1789 32.1789 17.43 32.5666 16.4869L33.4114 14.4317Z" fill="#333333" />
-                        <path d="M22.0751 24.2499C22.4148 23.4235 23.5852 23.4235 23.9249 24.2499L25.2525 27.4794C25.8618 28.9614 27.0386 30.1382 28.5206 30.7475L31.7501 32.0751C32.5765 32.4148 32.5765 33.5852 31.7501 33.9249L28.5206 35.2525C27.0386 35.8618 25.8618 37.0386 25.2525 38.5206L23.9249 41.7501C23.5852 42.5765 22.4148 42.5765 22.0751 41.7501L20.7475 38.5206C20.1382 37.0386 18.9614 35.8618 17.4794 35.2525L14.2499 33.9249C13.4235 33.5852 13.4235 32.4148 14.2499 32.0751L17.4794 30.7475C18.9614 30.1382 20.1382 28.9614 20.7475 27.4794L22.0751 24.2499Z" fill="#333333" />
-                    </svg>
-
-                </button>
+                    <button
+                        className="active:scale-95 transition-transform cursor-pointer shrink-0"
+                        onClick={handleSend}
+                        disabled={disabled}
+                    >
+                        <svg className="w-10 h-10 md:w-[49px] md:h-[49px]" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="24.5" cy="24.5" r="24.5" fill="#F9F9F9" />
+                            <path d="M24.7478 6.6136C24.8404 6.38822 25.1596 6.38822 25.2522 6.6136L25.6143 7.49438C25.7805 7.89858 26.1014 8.21951 26.5056 8.38568L27.3864 8.74776C27.6118 8.8404 27.6118 9.1596 27.3864 9.25224L26.5056 9.61432C26.1014 9.78049 25.7805 10.1014 25.6143 10.5056L25.2522 11.3864C25.1596 11.6118 24.8404 11.6118 24.7478 11.3864L24.3857 10.5056C24.2195 10.1014 23.8986 9.78049 23.4944 9.61432L22.6136 9.25224C22.3882 9.1596 22.3882 8.8404 22.6136 8.74776L23.4944 8.38568C23.8986 8.21951 24.2195 7.89858 24.3857 7.49438L24.7478 6.6136Z" fill="#333333" />
+                            <path d="M15.6637 14.8181C15.7872 14.5176 16.2128 14.5176 16.3363 14.8181L16.8191 15.9925C17.0406 16.5314 17.4686 16.9594 18.0075 17.1809L19.1819 17.6637C19.4824 17.7872 19.4824 18.2128 19.1819 18.3363L18.0075 18.8191C17.4686 19.0406 17.0406 19.4686 16.8191 20.0075L16.3363 21.1819C16.2128 21.4824 15.7872 21.4824 15.6637 21.1819L15.1809 20.0075C14.9594 19.4686 14.5314 19.0406 13.9925 18.8191L12.8181 18.3363C12.5176 18.2128 12.5176 17.7872 12.8181 17.6637L13.9925 17.1809C14.5314 16.9594 14.9594 16.5314 15.1809 15.9925L15.6637 14.8181Z" fill="#333333" />
+                            <path d="M33.4114 14.4317C33.6276 13.9059 34.3724 13.9059 34.5886 14.4317L35.4334 16.4869C35.8211 17.43 36.57 18.1789 37.5131 18.5666L39.5683 19.4114C40.0941 19.6276 40.0941 20.3724 39.5683 20.5886L37.5131 21.4334C36.57 21.8211 35.8211 22.57 35.4334 23.5131L34.5886 25.5683C34.3724 26.0941 33.6276 26.0941 33.4114 25.5683L32.5666 23.5131C32.1789 22.57 31.43 21.8211 30.4869 21.4334L28.4317 20.5886C27.9059 20.3724 27.9059 19.6276 28.4317 19.4114L30.4869 18.5666C31.43 18.1789 32.1789 17.43 32.5666 16.4869L33.4114 14.4317Z" fill="#333333" />
+                            <path d="M22.0751 24.2499C22.4148 23.4235 23.5852 23.4235 23.9249 24.2499L25.2525 27.4794C25.8618 28.9614 27.0386 30.1382 28.5206 30.7475L31.7501 32.0751C32.5765 32.4148 32.5765 33.5852 31.7501 33.9249L28.5206 35.2525C27.0386 35.8618 25.8618 37.0386 25.2525 38.5206L23.9249 41.7501C23.5852 42.5765 22.4148 42.5765 22.0751 41.7501L20.7475 38.5206C20.1382 37.0386 18.9614 35.8618 17.4794 35.2525L14.2499 33.9249C13.4235 33.5852 13.4235 32.4148 14.2499 32.0751L17.4794 30.7475C18.9614 30.1382 20.1382 28.9614 20.7475 27.4794L22.0751 24.2499Z" fill="#333333" />
+                        </svg>
+                    </button>
+                </div>
 
             </div>
         </div>

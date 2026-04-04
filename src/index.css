@@ -147,6 +147,19 @@ html, body, #root {
   );
 }
 
+@media (max-width: 640px) {
+  .sidebar-scroll::-webkit-scrollbar,
+  .message-input-scroll::-webkit-scrollbar,
+  .main-content-scroll::-webkit-scrollbar {
+    width: 0px;
+  }
+  .sidebar-scroll,
+  .message-input-scroll,
+  .main-content-scroll {
+    scrollbar-width: none;
+  }
+}
+
 @keyframes fadeInItem {
   from {
     opacity: 0;

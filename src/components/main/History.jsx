@@ -63,9 +63,9 @@ const History = () => {
     <div className="flex-1 overflow-y-auto flex items-center">
       <div className="w-8/9 mx-auto text-white">
 
-        <h2 className="text-[20px] font-semibold mb-8">
-          <div className="font-manrope font-medium text-[20px] leading-[28px] tracking-[0.03em]">Selamunaleykum</div>
-          <div className="font-manrope font-medium text-[24px] leading-[28px] tracking-[0.03em]">Ne yapmak istersin?</div>
+        <h2 className="font-semibold mb-6 md:mb-8">
+          <div className="font-manrope font-medium text-[17px] md:text-[20px] leading-[28px] tracking-[0.03em]">Selamunaleykum</div>
+          <div className="font-manrope font-medium text-[20px] md:text-[24px] leading-[28px] tracking-[0.03em]">Ne yapmak istersin?</div>
         </h2>
 
         <div className="flex flex-col items-start space-y-4">
@@ -83,7 +83,7 @@ const History = () => {
             <div
               key={index}
               className="inline-flex items-center gap-3 bg-[#333333] rounded-full
-              px-6 py-[8px] cursor-pointer hover:bg-[#3f3f3f] transition">
+              px-4 py-[7px] md:px-6 md:py-[8px] cursor-pointer hover:bg-[#3f3f3f] transition">
               {item.icon}
               <span className="font-inter font-normal text-[16px] leading-[100%] tracking-[0%]">
                 {item.text}

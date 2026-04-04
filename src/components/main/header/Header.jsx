@@ -27,7 +27,7 @@ const Header = ({ title, titleControl, inOutControl }) => {
           }
 
         </div>
-        <div className="font-inter font-normal text-[26px] leading-none tracking-[0.12em] text-center align-middle">
+        <div className="font-inter font-normal text-[20px] md:text-[26px] leading-none tracking-[0.12em] text-center align-middle">
           SUFFA AI
         </div>
         <div className="">
